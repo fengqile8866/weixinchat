@@ -2,53 +2,61 @@ import { Box, Typography, styled } from '@mui/material';
 import { Wifi as WifiIcon } from '@mui/icons-material';
 import { SignalCellularAlt as SignalCellularAltIcon } from '@mui/icons-material';
 import { BatteryFull as BatteryFullIcon } from '@mui/icons-material';
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 
 interface PhoneHeaderProps {
   nickname: string;
 }
 
 const StatusBar = styled(Box)(() => ({
+  height: 24,
+  backgroundColor: '#ededed',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '6px 16px',
-  backgroundColor: 'rgba(245, 245, 245, 0.95)',
-  backdropFilter: 'blur(10px)',
-  fontSize: '14px',
-  color: '#1a1a1a',
+  padding: '0 12px',
+  color: '#000',
+  fontSize: 12,
+  fontWeight: 500,
   '& .MuiSvgIcon-root': {
-    fontSize: '18px',
-    color: '#1a1a1a'
+    fontSize: 14,
+    color: '#000'
+  },
+  '& .battery-level': {
+    marginLeft: 2,
+    fontSize: 12
   }
 }));
 
 const ChatHeader = styled(Box)(() => ({
+  height: 48,
+  backgroundColor: '#EDEDED',
   display: 'flex',
   alignItems: 'center',
-  padding: '16px',
-  backgroundColor: 'rgba(245, 245, 245, 0.95)',
-  backdropFilter: 'blur(10px)',
-  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+  padding: '0 16px',
   position: 'relative',
-  transition: 'all 0.3s ease'
+  zIndex: 1,
+  borderBottom: '1px solid #d6d6d6',
+  '& .MuiSvgIcon-root': {
+    color: '#000',
+    fontSize: 24,
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    }
+  }
 }));
 
 const BackButton = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
   position: 'absolute',
   left: '16px',
   cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  color: '#07C160',
+  color: '#000',
   transition: 'transform 0.2s ease',
   '&:hover': {
     transform: 'translateX(-2px)'
-  },
-  '&::before': {
-    content: '"<"',
-    marginRight: '4px',
-    fontSize: '18px',
-    fontWeight: 'bold'
   }
 });
 
@@ -58,17 +66,23 @@ const PhoneHeader = ({ nickname }: PhoneHeaderProps) => {
       <StatusBar>
         <Box>09:41</Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <SignalCellularAltIcon sx={{ fontSize: 16 }} />
-          <WifiIcon sx={{ fontSize: 16 }} />
-          <BatteryFullIcon sx={{ fontSize: 16 }} />
+          <SignalCellularAltIcon />
+          <WifiIcon />
+          <BatteryFullIcon />
+          <span className="battery-level">99%</span>
         </Box>
       </StatusBar>
       <ChatHeader>
-        <BackButton>3</BackButton>
+        <BackButton>
+          <ArrowBackIcon />
+        </BackButton>
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-          <Typography sx={{ fontSize: '17px', fontWeight: '500' }}>
+          <Typography sx={{ fontSize: '17px', fontWeight: '500', color: '#000' }}>
             {nickname}
           </Typography>
+        </Box>
+        <Box sx={{ position: 'absolute', right: '16px', cursor: 'pointer' }}>
+          <MoreHorizIcon />
         </Box>
       </ChatHeader>
     </Box>
