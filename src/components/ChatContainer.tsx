@@ -7,58 +7,9 @@ interface ChatContainerProps {
   backgroundImage: string;
 }
 
-const StatusBar = styled(Box)(() => ({
-  height: 32,
-  backgroundColor: '#fff',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '0 16px',
-  color: '#000',
-  fontSize: '14px',
-  fontWeight: 500,
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-  '& .time': {
-    marginLeft: 4
-  },
-  '& .right': {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4
-  }
-}));
 
-const TitleBar = styled(Box)(() => ({
-  height: 44,
-  backgroundColor: '#ededed',
-  display: 'flex',
-  alignItems: 'center',
-  padding: '0 12px',
-  position: 'relative',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-  borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
-  '& .back': {
-    fontSize: '16px',
-    color: '#000',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4
-  },
-  '& .title': {
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    fontSize: '17px',
-    fontWeight: 500
-  },
-  '& .more': {
-    position: 'absolute',
-    right: 12,
-    fontSize: '20px'
-  }
-}));
+
+
 
 const Container = styled(Box)(({ theme }) => ({
   width: 375,

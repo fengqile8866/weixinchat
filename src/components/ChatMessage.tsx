@@ -6,9 +6,6 @@ interface ChatMessageProps {
   isRight: boolean;
   timestamp: string;
   avatar?: string;
-  type?: 'text' | 'image' | 'emoji';
-  imageUrl?: string;
-  emojiId?: string;
 }
 
 const MessageContainer = styled(Box)(({ theme }) => ({
@@ -73,27 +70,7 @@ const ChatMessage = ({ content, isRight, timestamp, avatar, type = 'text', image
             }
           }}
         >
-          {type === 'image' ? (
-            <Box
-              component="img"
-              src={imageUrl}
-              alt="图片消息"
-              sx={{
-                maxWidth: '200px',
-                maxHeight: '200px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease',
-                '&:hover': {
-                  transform: 'scale(1.02)'
-                }
-              }}
-            />
-          ) : type === 'emoji' ? (
-            <Box sx={{ fontSize: '24px' }}>{content}</Box>
-          ) : (
-            content
-          )}
+          {content}
         </MessageBubble>
         <Timestamp>{timestamp}</Timestamp>
       </Box>

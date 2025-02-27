@@ -6,9 +6,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import React from 'react';
 
 interface InputToolbarProps {
-  onImageUpload: () => void;
-  onEmojiSelect: () => void;
-  onVoiceInput: () => void;
+  onImageUpload?: () => void;
 }
 
 const InputContainer = styled(Box)(() => ({
@@ -59,12 +57,9 @@ const ActionButton = styled(IconButton)(() => ({
   }
 }));
 
-const InputToolbar = ({ onImageUpload, onEmojiSelect, onVoiceInput }: InputToolbarProps) => {
+const InputToolbar = ({ onImageUpload }: InputToolbarProps) => {
   return (
     <InputContainer>
-      <ActionButton onClick={onVoiceInput}>
-        <MicIcon />
-      </ActionButton>
       <InputWrapper>
         <StyledInput
           fullWidth
@@ -73,12 +68,6 @@ const InputToolbar = ({ onImageUpload, onEmojiSelect, onVoiceInput }: InputToolb
       </InputWrapper>
       <ActionButton onClick={onImageUpload}>
         <ImageIcon />
-      </ActionButton>
-      <ActionButton onClick={onEmojiSelect}>
-        <InsertEmoticonIcon />
-      </ActionButton>
-      <ActionButton>
-        <AddCircleIcon />
       </ActionButton>
     </InputContainer>
   );
