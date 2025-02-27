@@ -1,142 +1,86 @@
-import { useState } from 'react';
-import { Box, IconButton, styled } from '@mui/material';
+import { Box, IconButton, InputBase, styled } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ImageIcon from '@mui/icons-material/Image';
+import React from 'react';
 
 interface InputToolbarProps {
-  onImageUpload: (file: File) => void;
-  onEmojiSelect: (emoji: string) => void;
+  onImageUpload: () => void;
+  onEmojiSelect: () => void;
   onVoiceInput: () => void;
 }
 
-const InputField = styled('input')({
-  backgroundColor: '#fff',
-  flex: 1,
-  margin: '0 8px',
-  padding: '6px 12px',
-  borderRadius: '4px',
-  border: '1px solid #ddd',
-  outline: 'none',
-  fontSize: '14px',
-  '&:focus': {
-    borderColor: '#07C160'
-  }
-});
-
-const ToolbarContainer = styled(Box)({
+const InputContainer = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
   padding: '8px 12px',
-  backgroundColor: '#f5f5f5',
-  borderTop: '1px solid #e0e0e0',
-  minHeight: '50px',
-  position: 'relative'
-});
+  backgroundColor: '#f6f6f6',
+  borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+  position: 'relative',
+  minHeight: '52px'
+}));
 
-const StyledIconButton = styled(IconButton)({
-  color: '#7d7d7d',
+const InputWrapper = styled(Box)(() => ({
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  backgroundColor: '#ffffff',
+  borderRadius: '4px',
+  padding: '8px 12px',
+  margin: '0 8px',
+  border: '1px solid #ddd',
+  '&:focus-within': {
+    borderColor: '#07C160'
+  }
+}));
+
+const StyledInput = styled(InputBase)(() => ({
+  flex: 1,
+  padding: 0,
+  fontSize: '16px',
+  '& input': {
+    padding: 0
+  },
+  '& input::placeholder': {
+    color: '#999',
+    fontSize: '15px'
+  }
+}));
+
+const ActionButton = styled(IconButton)(() => ({
   padding: '8px',
+  color: '#7d7d7d',
   '&:hover': {
-    color: '#07C160',
-    backgroundColor: 'rgba(7, 193, 96, 0.04)'
+    color: '#07C160'
   },
   '& .MuiSvgIcon-root': {
     fontSize: '24px'
   }
-});
-
-const EmojiPanel = styled(Box)({
-  position: 'absolute',
-  width: '320px',
-  bottom: '100%',
-  left: 0,
-  backgroundColor: '#fff',
-  border: '1px solid #e0e0e0',
-  borderRadius: '8px',
-  padding: '12px',
-  display: 'grid',
-  gridTemplateColumns: 'repeat(8, 1fr)',
-  gap: '8px',
-  maxHeight: '240px',
-  overflowY: 'auto',
-  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)',
-  zIndex: 1000,
-  '&::-webkit-scrollbar': {
-    width: '6px'
-  },
-  '&::-webkit-scrollbar-thumb': {
-    backgroundColor: '#ccc',
-    borderRadius: '3px'
-  }
-});
-
-const EmojiButton = styled(Box)({
-  cursor: 'pointer',
-  fontSize: '24px',
-  padding: '4px',
-  textAlign: 'center',
-  '&:hover': {
-    backgroundColor: '#f5f5f5',
-    borderRadius: '4px'
-  }
-});
-
-const commonEmojis = ['😊', '😂', '🤣', '❤️', '😍', '🤔', '👍', '🎉', '🌹', '🔥', '😭', '😘', '🥰', '😅', '😉', '🤗'];
+}));
 
 const InputToolbar = ({ onImageUpload, onEmojiSelect, onVoiceInput }: InputToolbarProps) => {
-  const [showEmojiPanel, setShowEmojiPanel] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      onImageUpload(file);
-    }
-  };
-
   return (
-    <ToolbarContainer>
-      <StyledIconButton onClick={onVoiceInput}>
+    <InputContainer>
+      <ActionButton onClick={onVoiceInput}>
         <MicIcon />
-      </StyledIconButton>
-      <InputField
-        type="text"
-        placeholder="发送消息"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-      />
-      <Box sx={{ position: 'relative' }}>
-        <StyledIconButton onClick={() => setShowEmojiPanel(!showEmojiPanel)}>
-          <InsertEmoticonIcon />
-        </StyledIconButton>
-        {showEmojiPanel && (
-          <EmojiPanel>
-            {commonEmojis.map((emoji, index) => (
-              <EmojiButton
-                key={index}
-                onClick={() => {
-                  onEmojiSelect(emoji);
-                  setShowEmojiPanel(false);
-                }}
-              >
-                {emoji}
-              </EmojiButton>
-            ))}
-          </EmojiPanel>
-        )}
-      </Box>
-      <StyledIconButton component="label">
-        <ImageIcon />
-        <input
-          type="file"
-          hidden
-          accept="image/*"
-          onChange={handleImageUpload}
+      </ActionButton>
+      <InputWrapper>
+        <StyledInput
+          fullWidth
+          placeholder="发送消息"
         />
-      </StyledIconButton>
-    </ToolbarContainer>
+      </InputWrapper>
+      <ActionButton onClick={onImageUpload}>
+        <ImageIcon />
+      </ActionButton>
+      <ActionButton onClick={onEmojiSelect}>
+        <InsertEmoticonIcon />
+      </ActionButton>
+      <ActionButton>
+        <AddCircleIcon />
+      </ActionButton>
+    </InputContainer>
   );
 };
 

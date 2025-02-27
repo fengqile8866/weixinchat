@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Typography, styled, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Button, TextField, Typography, styled, Accordion, AccordionSummary, AccordionDetails, Divider, IconButton, Tooltip } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
+import { motion } from 'framer-motion';
 import defaultAvatar from '../assets/default-avatar.png';
 import { Message, ChatConfig } from '../types';
 
@@ -16,7 +19,7 @@ interface ConfigPanelProps extends ChatConfig {
   onBatchGenerate: () => void;
 }
 
-const AvatarUpload = styled(Box)({
+const AvatarUpload = styled(motion.div)({
   cursor: 'pointer',
   width: '100px',
   height: '100px',
@@ -35,15 +38,19 @@ const AvatarUpload = styled(Box)({
   }
 });
 
-const StyledButton = styled(Button)({
+const StyledButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
-  borderRadius: '6px',
+  borderRadius: '8px',
+  padding: '8px 16px',
   transition: 'all 0.2s ease',
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
   '&:hover': {
-    transform: 'translateY(-1px)',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    backgroundColor: theme.palette.primary.dark
   }
-});
+}));
 
 const MessageInput = styled(TextField)({
   marginBottom: '16px',
@@ -242,14 +249,24 @@ const ConfigPanel = ({
         >
           批量生成
         </StyledButton>
-        <StyledButton
-          variant="outlined"
-          onClick={onExportMessages}
-          sx={{ flex: 1, borderColor: '#07C160', color: '#07C160', '&:hover': { borderColor: '#06AE56', color: '#06AE56' } }}
-          size="small"
-        >
-          导出消息
-        </StyledButton>
+        <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
+          <StyledButton
+            variant="outlined"
+            onClick={() => onExportMessages('json')}
+            sx={{ flex: 1, borderColor: '#07C160', color: '#07C160', '&:hover': { borderColor: '#06AE56', color: '#06AE56' } }}
+            size="small"
+          >
+            导出JSON
+          </StyledButton>
+          <StyledButton
+            variant="outlined"
+            onClick={() => onExportMessages('image')}
+            sx={{ flex: 1, borderColor: '#07C160', color: '#07C160', '&:hover': { borderColor: '#06AE56', color: '#06AE56' } }}
+            size="small"
+          >
+            导出截图
+          </StyledButton>
+        </Box>
       </Box>
     </Box>
   );

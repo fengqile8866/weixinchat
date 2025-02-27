@@ -17,6 +17,8 @@ const StatusBar = styled(Box)(() => ({
   color: '#000',
   fontSize: '14px',
   fontWeight: 500,
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
   '& .time': {
     marginLeft: 4
   },
@@ -34,6 +36,9 @@ const TitleBar = styled(Box)(() => ({
   alignItems: 'center',
   padding: '0 12px',
   position: 'relative',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+  borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
   '& .back': {
     fontSize: '16px',
     color: '#000',
@@ -57,12 +62,13 @@ const TitleBar = styled(Box)(() => ({
 
 const Container = styled(Box)(({ theme }) => ({
   width: 375,
-  height: 667,
+  height: 750,  // 修改为宽度的2倍，实现2:1的比例
   backgroundColor: '#f7f7f7',
   position: 'relative',
   borderRadius: 32,
   overflow: 'hidden',
-  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)'
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+  transition: 'all 0.3s ease-in-out'
 }));
 
 const BackgroundLayer = styled(Box)<{ bgImage: string }>(({ bgImage }) => ({
@@ -74,8 +80,8 @@ const BackgroundLayer = styled(Box)<{ bgImage: string }>(({ bgImage }) => ({
   backgroundImage: bgImage ? `url(${bgImage})` : 'none',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
-  opacity: 0.6,
-  zIndex: 0
+  opacity: 0.8,
+  zIndex: -1
 }));
 
 const ContentLayer = styled(Box)(() => ({
@@ -87,8 +93,7 @@ const ContentLayer = styled(Box)(() => ({
   '& > *:last-child': {
     flex: 1,
     position: 'relative',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    backdropFilter: 'blur(10px)'
+    backgroundColor: 'transparent'
   }
 }));
 
@@ -108,14 +113,7 @@ const ChatContainer = ({ children, backgroundColor, backgroundImage }: ChatConta
             <span>🔋 99%</span>
           </div>
         </StatusBar>
-        <TitleBar>
-          <div className="back">
-            <span>⬅️</span>
-            <span>3</span>
-          </div>
-          <div className="title">一米阳光</div>
-          <div className="more">⋮</div>
-        </TitleBar>
+
         <Box sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
           {backgroundImage && <BackgroundLayer bgImage={backgroundImage} />}
           {children}

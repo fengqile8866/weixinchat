@@ -15,39 +15,38 @@ const MessageContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'flex-start',
-  marginBottom: theme.spacing(2),
-  padding: theme.spacing(0.5, 2),
+  marginBottom: theme.spacing(1),
+  padding: theme.spacing(0.5, 1.5),
   transition: 'all 0.2s ease'
 }));
 
 const MessageBubble = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(1.2, 1.4),
+  padding: theme.spacing(1, 1.2),
   maxWidth: '280px',
   minWidth: '36px',
   wordBreak: 'break-word',
   whiteSpace: 'pre-wrap',
-  borderRadius: '3px',
+  borderRadius: '4px',
   boxShadow: 'none',
-  fontSize: '16px',
+  fontSize: '17px',
   lineHeight: '1.4',
-  letterSpacing: '0.2px',
+  letterSpacing: '0.3px',
   position: 'relative',
   '&::before': {
     content: '""',
     position: 'absolute',
-    top: '12px',
-    width: '6px',
-    height: '6px',
+    top: '14px',
+    width: '8px',
+    height: '8px',
     transform: 'rotate(45deg)'
   }
 }));
 
 const Avatar = styled('img')(() => ({
-  width: '42px',
-  height: '42px',
-  borderRadius: '4px',
-  marginRight: '10px',
-  marginLeft: '10px',
+  width: '40px',
+  height: '40px',
+  borderRadius: '3px',
+  margin: '0 4px',
   objectFit: 'cover'
 }));
 
@@ -67,6 +66,7 @@ const ChatMessage = ({ content, isRight, timestamp, avatar, type = 'text', image
         <MessageBubble 
           sx={{
             backgroundColor: isRight ? '#95EC69' : '#fff',
+            border: isRight ? 'none' : '1px solid #E7E7E7',
             '&::before': {
               [isRight ? 'right' : 'left']: '-4px',
               backgroundColor: isRight ? '#95EC69' : '#fff'
