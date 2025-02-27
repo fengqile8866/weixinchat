@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Typography, styled, Accordion, AccordionSummary, AccordionDetails, Divider, IconButton, Tooltip } from '@mui/material';
+import { Box, Button, TextField, Typography, styled, Accordion, AccordionSummary, AccordionDetails, Divider, IconButton, Tooltip, Paper } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import { motion } from 'framer-motion';
 import defaultAvatar from '../assets/default-avatar.png';
 import { Message, ChatConfig } from '../types';
 
 interface ConfigPanelProps extends ChatConfig {
+  messages: Message[];
   onUpdateMessages: (updater: (prevMessages: Message[]) => Message[]) => void;
-  onExportMessages: () => void;
+  onExportMessages: (type: 'json' | 'image') => void;
   onLeftNicknameChange: (name: string) => void;
   onRightNicknameChange: (name: string) => void;
   onLeftAvatarChange: (avatar: string) => void;
@@ -66,7 +70,19 @@ const MessageInput = styled(TextField)({
   }
 });
 
+const MessageItem = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(1),
+  borderRadius: '8px',
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[2]
+  }
+}));
+
 const ConfigPanel = ({ 
+  messages, 
   onUpdateMessages, 
   onExportMessages,
   leftNickname,
@@ -85,6 +101,8 @@ const ConfigPanel = ({
 }: ConfigPanelProps) => {
   const [messageContent, setMessageContent] = useState('');
   const [isRight, setIsRight] = useState(false);
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState('');
 
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>, isRight: boolean) => {
     const file = event.target.files?.[0];
@@ -101,7 +119,7 @@ const ConfigPanel = ({
     }
   };
 
-  const handleBackgroundUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBackgroundImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
@@ -113,161 +131,339 @@ const ConfigPanel = ({
   };
 
   const handleAddMessage = () => {
-    if (!messageContent.trim()) return;
+    if (messageContent.trim()) {
+      onUpdateMessages(prev => [...prev, {
+        id: Date.now(),
+        content: messageContent.trim(),
+        isRight,
+        timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+      }]);
+      setMessageContent('');
+    }
+  };
 
-    const newMessage = {
-      id: Date.now(),
-      content: messageContent,
-      isRight,
-      timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    };
+  const handleDeleteMessage = (id: number) => {
+    onUpdateMessages(prev => prev.filter(msg => msg.id !== id));
+  };
 
-    onUpdateMessages((prevMessages) => [...prevMessages, newMessage]);
-    setMessageContent('');
+  const startEditMessage = (id: number, content: string) => {
+    setEditingMessageId(id);
+    setEditingContent(content);
+  };
+
+  const handleEditMessage = () => {
+    if (editingMessageId !== null && editingContent.trim()) {
+      onUpdateMessages(prev => prev.map(msg => 
+        msg.id === editingMessageId ? { ...msg, content: editingContent.trim() } : msg
+      ));
+      setEditingMessageId(null);
+      setEditingContent('');
+    }
+  };
+
+  const cancelEditMessage = () => {
+    setEditingMessageId(null);
+    setEditingContent('');
   };
 
   return (
-    <Box sx={{ maxWidth: 400 }}>
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#333', mb: 2 }}>聊天配置</Typography>
+    <Box>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+        微信聊天生成器
+      </Typography>
       
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography sx={{ fontWeight: 500 }}>用户信息</Typography>
+          <Typography sx={{ fontWeight: 500 }}>基本设置</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Box sx={{ flex: 1 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>左侧用户昵称</Typography>
+            <TextField 
+              fullWidth 
+              size="small" 
+              value={leftNickname}
+              onChange={(e) => onLeftNicknameChange(e.target.value)}
+            />
+          </Box>
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>右侧用户昵称</Typography>
+            <TextField 
+              fullWidth 
+              size="small" 
+              value={rightNickname}
+              onChange={(e) => onRightNicknameChange(e.target.value)}
+            />
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <Box>
               <Typography variant="subtitle2" gutterBottom>左侧头像</Typography>
-              <AvatarUpload sx={{ width: 80, height: 80, mb: 1 }}>
-                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleAvatarUpload(e, false)} id="left-avatar-upload" />
-                <label htmlFor="left-avatar-upload" style={{ cursor: 'pointer', display: 'block', height: '100%' }}>
-                  <img src={leftAvatar || defaultAvatar} alt="left avatar" />
-                </label>
-              </AvatarUpload>
-              <TextField fullWidth value={leftNickname} onChange={(e) => onLeftNicknameChange(e.target.value)} size="small" label="左侧昵称" />
+              <input
+                accept="image/*"
+                id="left-avatar-upload"
+                type="file"
+                style={{ display: 'none' }}
+                onChange={(e) => handleAvatarUpload(e, false)}
+              />
+              <label htmlFor="left-avatar-upload">
+                <AvatarUpload whileHover={{ scale: 1.05 }}>
+                  <img src={leftAvatar || defaultAvatar} alt="左侧头像" />
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      color: '#fff',
+                      padding: '4px',
+                      textAlign: 'center',
+                      fontSize: '12px'
+                    }}
+                  >
+                    点击更换
+                  </Box>
+                </AvatarUpload>
+              </label>
             </Box>
-            <Box sx={{ flex: 1 }}>
+            
+            <Box>
               <Typography variant="subtitle2" gutterBottom>右侧头像</Typography>
-              <AvatarUpload sx={{ width: 80, height: 80, mb: 1 }}>
-                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleAvatarUpload(e, true)} id="right-avatar-upload" />
-                <label htmlFor="right-avatar-upload" style={{ cursor: 'pointer', display: 'block', height: '100%' }}>
-                  <img src={rightAvatar || defaultAvatar} alt="right avatar" />
-                </label>
-              </AvatarUpload>
-              <TextField fullWidth value={rightNickname} onChange={(e) => onRightNicknameChange(e.target.value)} size="small" label="右侧昵称" />
+              <input
+                accept="image/*"
+                id="right-avatar-upload"
+                type="file"
+                style={{ display: 'none' }}
+                onChange={(e) => handleAvatarUpload(e, true)}
+              />
+              <label htmlFor="right-avatar-upload">
+                <AvatarUpload whileHover={{ scale: 1.05 }}>
+                  <img src={rightAvatar || defaultAvatar} alt="右侧头像" />
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      color: '#fff',
+                      padding: '4px',
+                      textAlign: 'center',
+                      fontSize: '12px'
+                    }}
+                  >
+                    点击更换
+                  </Box>
+                </AvatarUpload>
+              </label>
             </Box>
+          </Box>
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>背景颜色</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <input
+                type="color"
+                value={backgroundColor}
+                onChange={(e) => onBackgroundColorChange(e.target.value)}
+                style={{ width: '40px', height: '40px', border: 'none', cursor: 'pointer' }}
+              />
+              <TextField 
+                size="small" 
+                value={backgroundColor}
+                onChange={(e) => onBackgroundColorChange(e.target.value)}
+                sx={{ width: '120px' }}
+              />
+            </Box>
+          </Box>
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>背景图片</Typography>
+            <input
+              accept="image/*"
+              id="background-image-upload"
+              type="file"
+              style={{ display: 'none' }}
+              onChange={handleBackgroundImageUpload}
+            />
+            <label htmlFor="background-image-upload">
+              <Button
+                component="span"
+                variant="outlined"
+                startIcon={<AddPhotoAlternateIcon />}
+                sx={{ textTransform: 'none' }}
+              >
+                {backgroundImage ? '更换背景图片' : '上传背景图片'}
+              </Button>
+            </label>
+            {backgroundImage && (
+              <Button 
+                variant="text" 
+                color="error" 
+                size="small"
+                onClick={() => onBackgroundImageChange('')}
+                sx={{ ml: 1, textTransform: 'none' }}
+              >
+                移除
+              </Button>
+            )}
           </Box>
         </AccordionDetails>
       </Accordion>
-
+      
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography sx={{ fontWeight: 500 }}>消息管理</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <MessageInput
-            fullWidth
-            multiline
-            rows={3}
-            value={messageContent}
-            onChange={(e) => setMessageContent(e.target.value)}
-            placeholder="输入消息内容"
-            label="消息内容"
-          />
-          <Box sx={{ display: 'flex', gap: 1, mt: 1, mb: 2 }}>
-            <StyledButton
-              variant="contained"
-              onClick={() => setIsRight(!isRight)}
-              sx={{ flex: 1, bgcolor: '#07C160', '&:hover': { bgcolor: '#06AE56' } }}
-              size="small"
-            >
-              {isRight ? '切换到左侧' : '切换到右侧'}
-            </StyledButton>
-            <StyledButton
-              variant="contained"
-              onClick={handleAddMessage}
-              disabled={!messageContent.trim()}
-              sx={{ flex: 1, bgcolor: '#07C160', '&:hover': { bgcolor: '#06AE56' } }}
-              size="small"
-            >
-              添加消息
-            </StyledButton>
-          </Box>
-        </AccordionDetails>
-      </Accordion>
-
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography sx={{ fontWeight: 500 }}>背景设置</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" gutterBottom>背景颜色</Typography>
-              <input
-                type="color"
-                value={backgroundColor}
-                onChange={(e) => onBackgroundColorChange(e.target.value)}
-                style={{
-                  width: '100%',
-                  height: '32px',
-                  padding: 0,
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" gutterBottom>背景图片</Typography>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>添加新消息</Typography>
+            <MessageInput
+              fullWidth
+              multiline
+              rows={2}
+              placeholder="输入消息内容"
+              value={messageContent}
+              onChange={(e) => setMessageContent(e.target.value)}
+              variant="outlined"
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Button
+                  variant="outlined"
+                  color={isRight ? 'primary' : 'inherit'}
+                  onClick={() => setIsRight(true)}
+                  sx={{ mr: 1, textTransform: 'none' }}
+                >
+                  右侧发送
+                </Button>
+                <Button
+                  variant="outlined"
+                  color={!isRight ? 'primary' : 'inherit'}
+                  onClick={() => setIsRight(false)}
+                  sx={{ textTransform: 'none' }}
+                >
+                  左侧发送
+                </Button>
+              </Box>
               <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                size="small"
-                sx={{ height: '32px' }}
+                variant="contained"
+                onClick={handleAddMessage}
+                disabled={!messageContent.trim()}
+                sx={{ textTransform: 'none' }}
               >
-                {backgroundImage ? '更换背景' : '上传背景'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleBackgroundUpload}
-                />
+                添加消息
               </Button>
             </Box>
           </Box>
+          
+          <Divider sx={{ my: 2 }} />
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>批量操作</Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <StyledButton
+                variant="contained"
+                onClick={onBatchGenerate}
+              >
+                批量生成随机消息
+              </StyledButton>
+              <StyledButton
+                variant="outlined"
+                onClick={() => onUpdateMessages(() => [])}
+              >
+                清空所有消息
+              </StyledButton>
+            </Box>
+          </Box>
+          
+          <Divider sx={{ my: 2 }} />
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>消息列表</Typography>
+            {messages.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', py: 2, textAlign: 'center' }}>
+                暂无消息，请添加新消息或批量生成
+              </Typography>
+            ) : (
+              messages.map((msg) => (
+                <Box
+                  key={msg.id}
+                  sx={{ mb: 1 }}
+                >
+                  <MessageItem>
+                    {editingMessageId === msg.id ? (
+                      <Box>
+                        <TextField
+                          fullWidth
+                          multiline
+                          size="small"
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                          sx={{ mb: 1 }}
+                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                          <IconButton size="small" onClick={handleEditMessage} color="primary">
+                            <CheckIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={cancelEditMessage}>
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {msg.isRight ? rightNickname : leftNickname} · {msg.timestamp}
+                          </Typography>
+                          <Box>
+                            <Tooltip title="编辑">
+                              <IconButton size="small" onClick={() => startEditMessage(msg.id, msg.content)}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="删除">
+                              <IconButton size="small" color="error" onClick={() => handleDeleteMessage(msg.id)}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+                        <Typography variant="body2">{msg.content}</Typography>
+                      </Box>
+                    )}
+                  </MessageItem>
+                </Box>
+              ))
+            )}
+          </Box>
+          
+          <Divider sx={{ my: 2 }} />
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>导出</Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <StyledButton
+                variant="contained"
+                onClick={() => onExportMessages('image')}
+                disabled={messages.length === 0}
+              >
+                导出为图片
+              </StyledButton>
+              <StyledButton
+                variant="outlined"
+                onClick={() => onExportMessages('json')}
+                disabled={messages.length === 0}
+              >
+                导出为JSON
+              </StyledButton>
+            </Box>
+          </Box>
         </AccordionDetails>
       </Accordion>
-
-      <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-        <StyledButton
-          variant="outlined"
-          onClick={onBatchGenerate}
-          sx={{ flex: 1, borderColor: '#07C160', color: '#07C160', '&:hover': { borderColor: '#06AE56', color: '#06AE56' } }}
-          size="small"
-        >
-          批量生成
-        </StyledButton>
-        <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
-          <StyledButton
-            variant="outlined"
-            onClick={() => onExportMessages('json')}
-            sx={{ flex: 1, borderColor: '#07C160', color: '#07C160', '&:hover': { borderColor: '#06AE56', color: '#06AE56' } }}
-            size="small"
-          >
-            导出JSON
-          </StyledButton>
-          <StyledButton
-            variant="outlined"
-            onClick={() => onExportMessages('image')}
-            sx={{ flex: 1, borderColor: '#07C160', color: '#07C160', '&:hover': { borderColor: '#06AE56', color: '#06AE56' } }}
-            size="small"
-          >
-            导出截图
-          </StyledButton>
-        </Box>
-      </Box>
     </Box>
   );
 };

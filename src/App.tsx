@@ -46,17 +46,20 @@ const App = () => {
   const [rightAvatar, setRightAvatar] = useState('');
   const [backgroundColor, setBackgroundColor] = useState('#ebebeb');
   const [backgroundImage, setBackgroundImage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([{
-    id: '1',
-    content: '你好啊！',
-    isRight: false,
-    timestamp: '12:01'
-  }, {
-    id: '2',
-    content: '最近在忙什么呢？',
-    isRight: true,
-    timestamp: '12:02'
-  }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      content: '你好啊！',
+      isRight: false,
+      timestamp: '12:01'
+    }, 
+    {
+      id: 2,
+      content: '最近在忙什么呢？',
+      isRight: true,
+      timestamp: '12:02'
+    }
+  ]);
 
   const handleExportMessages = async (type: 'json' | 'image' = 'json') => {
     try {
@@ -99,7 +102,7 @@ const App = () => {
         phoneContainer.style.position = 'relative';
         phoneContainer.style.overflow = 'visible';
 
-        const canvas = await html2canvas(phoneContainer, {
+        const canvas = await html2canvas(phoneContainer as HTMLElement, {
           useCORS: true,
           allowTaint: true,
           backgroundColor: 'transparent',
@@ -116,9 +119,9 @@ const App = () => {
           onclone: (clonedDoc) => {
             const clonedContainer = clonedDoc.querySelector('.MuiPaper-root');
             if (clonedContainer) {
-              clonedContainer.style.height = 'auto';
-              clonedContainer.style.position = 'relative';
-              clonedContainer.style.overflow = 'visible';
+              (clonedContainer as HTMLElement).style.height = 'auto';
+              (clonedContainer as HTMLElement).style.position = 'relative';
+              (clonedContainer as HTMLElement).style.overflow = 'visible';
             }
           }
         });
@@ -145,7 +148,7 @@ const App = () => {
           }, 100);
         }, 'image/png', 1.0);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('导出失败:', error);
       alert(`导出失败: ${error.message}`);
     }
@@ -164,7 +167,7 @@ const App = () => {
     ];
     
     const newMessages = Array(5).fill(null).map((_, index) => ({
-      id: Date.now().toString() + index,
+      id: Date.now() + index,
       content: templates[Math.floor(Math.random() * templates.length)],
       isRight: Math.random() > 0.5,
       timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })

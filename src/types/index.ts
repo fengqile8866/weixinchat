@@ -17,4 +17,5 @@ export interface ChatConfig {
   rightAvatar: string;
   backgroundColor: string;
   backgroundImage?: string;
+  messages?: Message[];
 }
